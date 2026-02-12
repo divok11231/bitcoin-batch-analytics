@@ -3,14 +3,29 @@ import requests
 BASE_URL = "https://mempool.space/api"
 
 def get_tip_height():
-    return int(requests.get(f"{BASE_URL}/blocks/tip/height").text)
+    r = requests.get(f"{BASE_URL}/blocks/tip/height")
+    r.raise_for_status()
+    height = r.json()
+    return height
+
 
 def get_block_hash(height):
-    return requests.get(f"{BASE_URL}/block-height/{height}").text.strip()
 
-def get_block_txids(block_hash):
-    return requests.get(f"{BASE_URL}/block/{block_hash}/txids").json()
+    r = requests.get(f"{BASE_URL}/block-height/{height}")
+    block_hash = r.text.strip()
 
-def get_transaction(txid):
-    return requests.get(f"{BASE_URL}/tx/{txid}").json()
+
+    return block_hash
+
+
+def fetch_block_transactions(height):
+
+    block_hash = get_block_hash(height)
+
+
+    r = requests.get(f"{BASE_URL}/block/{block_hash}/txs")
+    transactions = r.json()
+
+
+    return transactions
 
