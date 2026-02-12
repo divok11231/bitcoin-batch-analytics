@@ -2,35 +2,27 @@ from analyzer.fetch import (
     get_tip_height,
     get_block_hash,
     get_block_txids,
-    get_transaction
+    get_transaction,
 )
+from analyzer.encode import encode_block_transactions, finalize_numpy_arrays
+
 
 def main():
-    print("Mempool layer check")
-
     tip = get_tip_height()
-    print(tip)
-
-    test_height = tip - 3
-
-    block_hash = get_block_hash(test_height)
-    print(block_hash)
-
+    block_hash = get_block_hash(tip - 1)
     txids = get_block_txids(block_hash)
-    print(txids)
 
-    first_txid = txids[0]
-    print(first_txid)
+    transactions = []
+    for txid in txids[:50]:  # limit to 50 for test
+        transactions.append(get_transaction(txid))
 
-    tx = get_transaction(first_txid)
+    encoded = encode_block_transactions(transactions, block_index=0)
+    arrays = finalize_numpy_arrays(encoded)
 
-    print( tx.get('fee'))
-    print({len(tx.get('vin', []))})
-    print({len(tx.get('vout', []))})
+    print("Array shapes:")
+    for k, v in arrays.items():
+        print(k, v.shape, v.dtype)
 
-    if tx["vout"]:
-        print({tx['vout'][0].get('scriptpubkey_type')})
 
 if __name__ == "__main__":
     main()
-

@@ -7,5 +7,10 @@ SCRIPT_ENUM = {
     "v1_p2tr": 3,
 }
 
-#Setting default type to invalid 
-DEFAULT = 4
+# Setting default type to invalid
+
+DEFAULT_SCRIPT_TYPE = 4
+
+
+def map_script_type(script_str: str) -> int:
+    return SCRIPT_ENUM.get(script_str, DEFAULT_SCRIPT_TYPE)
