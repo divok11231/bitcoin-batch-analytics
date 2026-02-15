@@ -1,12 +1,11 @@
 import argparse
 import time
-from analyzer.gpu_utxo import gpu_build_utxo
-from analyzer.cpu_utxo import cpu_build_utxo
-from analyzer.fetch import get_tip_height, fetch_blocks_parallel
-from analyzer.encode import global_buffer, encode_block, extend_global_buffer, numpy_array
-from analyzer.cpu_stats import compute_cpu_stats
-from analyzer.gpu_stats import gpu_sum
-
+from .gpu_utxo import gpu_build_utxo
+from .cpu_utxo import cpu_build_utxo
+from .fetch import get_tip_height, fetch_blocks_parallel
+from .encode import global_buffer, encode_block, extend_global_buffer, numpy_array
+from .cpu_stats import compute_cpu_stats
+from .gpu_stats import gpu_sum
 
 def main(start_height=None, num_blocks=2, use_gpu=False):
 
@@ -61,14 +60,19 @@ def main(start_height=None, num_blocks=2, use_gpu=False):
         print(f"Fee match:   {gpu_fee_total == cpu_stats['total_fee']}")
         print(f"UTXO match:  {gpu_utxo_stats['utxo_total_value'] == cpu_utxo_total}")
 
+def run():
+    import argparse
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Bitcoin Block Analytics Engine")
-    parser.add_argument("--start", type=int, default=None, help="Starting block height")
-    parser.add_argument("--blocks", type=int, default=2, help="Number of blocks to analyze")
-    parser.add_argument("--gpu", action="store_true", help="Enable GPU acceleration")
+    parser = argparse.ArgumentParser(description="GPU Based Bitcoin Block Analytics Engine")
+    parser.add_argument("--start", type=int, default=None)
+    parser.add_argument("--blocks", type=int, default=2)
+    parser.add_argument("--gpu", action="store_true")
 
     args = parser.parse_args()
 
     main(args.start, args.blocks, args.gpu)
+
+
+if __name__ == "__main__":
+    run()
 

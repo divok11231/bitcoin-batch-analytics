@@ -1,28 +1,57 @@
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 
-# Conda
+# =========================
+# Virtual Environments
+# =========================
 .env
 .venv
 env/
 venv/
 conda-meta/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Build artifacts
+# =========================
+# Packaging / Distribution
+# =========================
 build/
 dist/
 *.egg-info/
+pip-wheel-metadata/
 
-# CUDA build artifacts
+# =========================
+# Testing / Coverage
+# =========================
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+# =========================
+# IDEs
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# CUDA / GPU
+# =========================
 *.ptx
 *.cubin
+*.fatbin
 
