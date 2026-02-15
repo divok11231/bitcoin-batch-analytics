@@ -6,9 +6,9 @@ import time
 
 
 KERNEL_CODE = """
-__global__ void sum_kernel(long long *data, long long *result, int n)
+__global__ void sum_kernel(unsigned long long *data,unsigned long long *result, int n)
 {
-    __shared__ long long sdata[256];
+    __shared__ unsigned long long sdata[256];
 
     int tid = threadIdx.x;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -28,8 +28,9 @@ __global__ void sum_kernel(long long *data, long long *result, int n)
 }
 """
 
-
 def gpu_sum(arr):
+
+    arr = arr.astype(np.uint64)
 
     n = np.int32(len(arr))
 
@@ -37,7 +38,8 @@ def gpu_sum(arr):
     result_gpu = cuda.mem_alloc(8)
 
     cuda.memcpy_htod(arr_gpu, arr)
-    cuda.memcpy_htod(result_gpu, np.zeros(1, dtype=np.int64))
+
+    cuda.memcpy_htod(result_gpu, np.zeros(1, dtype=np.uint64))
 
     mod = SourceModule(KERNEL_CODE)
     kernel = mod.get_function("sum_kernel")
@@ -58,7 +60,7 @@ def gpu_sum(arr):
     cuda.Context.synchronize()
     kernel_time = time.time() - start
 
-    result = np.zeros(1, dtype=np.int64)
+    result = np.zeros(1, dtype=np.uint64)
     cuda.memcpy_dtoh(result, result_gpu)
 
     return int(result[0]), kernel_time
