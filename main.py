@@ -1,54 +1,54 @@
+import argparse
 import time
+
 from analyzer.fetch import get_tip_height, fetch_block_transactions
-from analyzer.encode import (
-    encode_block,
-    global_buffer,
-    extend_global_buffer,
-    numpy_array,
-)
+from analyzer.encode import global_buffer, encode_block, extend_global_buffer, numpy_array
 from analyzer.cpu_stats import compute_cpu_stats
+from analyzer.gpu_stats import gpu_sum
 
-def main(start_height=None, num_blocks=2):
 
+def main(start_height=None, num_blocks=2, use_gpu=False):
 
     if start_height is None:
         tip = get_tip_height()
         start_height = tip - num_blocks
-        print(f"Latest tip: {tip}")
-        print(f"Starting at height: {start_height}\n")
 
-    global_buffers = global_buffer()
-    total_tx = 0
+    buffers = global_buffer()
+    all_transactions = []
 
+    for block_index, height in enumerate(range(start_height, start_height + num_blocks)):
 
-    for block_index, height in enumerate(
-        range(start_height, start_height + num_blocks)
-    ):
+        txs = fetch_block_transactions(height)
+        all_transactions.extend(txs)
 
+        encoded = encode_block(txs, block_index)
+        extend_global_buffer(buffers, encoded)
 
-        transactions = fetch_block_transactions(height)
+    arrays = numpy_array(buffers)
 
-        tx_count = len(transactions)
-        total_tx += tx_count
-
-        encoded = encode_block(transactions, block_index)
-        extend_global_buffer(global_buffers, encoded)
-
-
-    arrays = numpy_array(global_buffers)
+    print("CPU")
+    cpu_start = time.time()
     stats = compute_cpu_stats(arrays)
+    cpu_time = time.time() - cpu_start
 
-    print("CPU Stats:")
-    for k, v in stats.items():
-        print(f"   {k}: {v}")
+    print(f"CPU total_fee: {stats['total_fee']}")
+    print(f"CPU time: {cpu_time:.4f}s")
 
+    if use_gpu:
+        print("GPU")
+        gpu_total, kernel_time = gpu_sum(arrays["fees"])
 
-
-    for key, arr in arrays.items():
-        print(f"   {key}: shape={arr.shape}, dtype={arr.dtype}")
-
+        print(f"GPU total_fee: {gpu_total}")
+        print(f"Kernel time: {kernel_time:.4f}s")
+        print(f"Match: {gpu_total == stats['total_fee']}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--start", type=int, default=None)
+    parser.add_argument("--blocks", type=int, default=2)
+    parser.add_argument("--gpu", action="store_true")
 
+    args = parser.parse_args()
+
+    main(args.start, args.blocks, args.gpu)
