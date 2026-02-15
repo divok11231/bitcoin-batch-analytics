@@ -3,7 +3,6 @@ import time
 
 def cpu_build_utxo(transactions):
 
-    print(" UTXO build")
 
     t0 = time.time()
 
@@ -31,8 +30,6 @@ def cpu_build_utxo(transactions):
 
     total_time = time.time() - t0
 
-    print(f" Total value_cpu: {total_value}")
-    print(f"Time_cpu: {total_time:.4f}s")
 
-    return total_value, total_time
+    return total_value,len(utxo), total_time
 

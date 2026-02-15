@@ -46,10 +46,8 @@ MODULE = SourceModule(KERNEL_CODE)
 KERNEL = MODULE.get_function("mark_and_reduce")
 
 
-
 def gpu_build_utxo(arrays):
 
-    print("GPu UTXO build")
 
     t0 = time.time()
 
@@ -63,9 +61,8 @@ def gpu_build_utxo(arrays):
     in_n = np.int32(len(in_hash))
 
     print(f" Outputs: {out_n}")
-    print(f" Inputs: {in_n}")
+    print(f" Inputs:  {in_n}")
 
-    # Allocate device memory
     d_out_hash = cuda.mem_alloc(out_hash.nbytes)
     d_out_index = cuda.mem_alloc(out_index.nbytes)
     d_out_value = cuda.mem_alloc(out_value.nbytes)
@@ -78,7 +75,6 @@ def gpu_build_utxo(arrays):
     result = np.zeros(1, dtype=np.uint64)
     d_result = cuda.mem_alloc(result.nbytes)
 
-    # Copy to GPU
     cuda.memcpy_htod(d_out_hash, out_hash)
     cuda.memcpy_htod(d_out_index, out_index)
     cuda.memcpy_htod(d_out_value, out_value)
@@ -87,11 +83,9 @@ def gpu_build_utxo(arrays):
     cuda.memcpy_htod(d_spent, spent)
     cuda.memcpy_htod(d_result, result)
 
-    # Launch
     block = 256
     grid = int((out_n + block - 1) / block)
 
-    print(f"Launch grid={grid}, block={block}")
 
     t_kernel = time.time()
 
@@ -114,12 +108,17 @@ def gpu_build_utxo(arrays):
     kernel_time = time.time() - t_kernel
 
     cuda.memcpy_dtoh(result, d_result)
+    cuda.memcpy_dtoh(spent, d_spent)
 
     total_time = time.time() - t0
 
-    print(f"Kernel time: {kernel_time:.4f}s")
-    print(f"Total time: {total_time:.4f}s")
-    print(f"UTXO value: {int(result[0])}")
+    live_utxo_count = int(np.sum(spent == 0))
 
-    return int(result[0]), kernel_time
+
+    return {
+        "utxo_total_value": int(result[0]),
+        "utxo_count": live_utxo_count,
+        "kernel_time": kernel_time,
+        "total_time": total_time,
+    }
 
