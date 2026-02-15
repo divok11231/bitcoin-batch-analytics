@@ -1,6 +1,7 @@
 import argparse
 import time
-
+from analyzer.gpu_utxo import gpu_build_utxo
+from analyzer.cpu_utxo import cpu_build_utxo
 from analyzer.fetch import get_tip_height, fetch_block_transactions
 from analyzer.encode import global_buffer, encode_block, extend_global_buffer, numpy_array
 from analyzer.cpu_stats import compute_cpu_stats
@@ -25,6 +26,10 @@ def main(start_height=None, num_blocks=2, use_gpu=False):
         extend_global_buffer(buffers, encoded)
 
     arrays = numpy_array(buffers)
+    cpu_utxo_total, cpu_utxo_time = cpu_build_utxo(all_transactions)
+
+    print(f" CPU UTXO total: {cpu_utxo_total}")
+    print(f"CPU UTXO time: {cpu_utxo_time:.4f}s")
 
     print("CPU")
     cpu_start = time.time()
@@ -37,6 +42,8 @@ def main(start_height=None, num_blocks=2, use_gpu=False):
     if use_gpu:
         print("GPU")
         gpu_total, kernel_time = gpu_sum(arrays["fees"])
+        print(" Running GPU UTXO engine...")
+        utxo_total, utxo_time = gpu_build_utxo(arrays)
 
         print(f"GPU total_fee: {gpu_total}")
         print(f"Kernel time: {kernel_time:.4f}s")
