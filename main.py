@@ -6,6 +6,8 @@ from analyzer.fetch import get_tip_height, fetch_block_transactions
 from analyzer.encode import global_buffer, encode_block, extend_global_buffer, numpy_array
 from analyzer.cpu_stats import compute_cpu_stats
 from analyzer.gpu_stats import gpu_sum
+from analyzer.fetch import fetch_blocks_parallel
+
 
 
 def main(start_height=None, num_blocks=2, use_gpu=False):
@@ -16,10 +18,12 @@ def main(start_height=None, num_blocks=2, use_gpu=False):
 
     buffers = global_buffer()
     all_transactions = []
+    
+    block_data = fetch_blocks_parallel(start_height, num_blocks)
 
-    for block_index, height in enumerate(range(start_height, start_height + num_blocks)):
+    for block_index, height in enumerate(sorted(block_data.keys())):
 
-        txs = fetch_block_transactions(height)
+        txs = block_data[height]
         all_transactions.extend(txs)
 
         encoded = encode_block(txs, block_index)
