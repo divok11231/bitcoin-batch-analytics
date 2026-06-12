@@ -34,5 +34,5 @@ GPU-accelerated Bitcoin blockchain analytics tool. Analyze transaction fees, inp
 conda create -n btc-gpu python=3.10 -y
 conda activate btc-gpu
 
-pip install git+https://github.com/yourusername/bitcoin-batch-analytics.git
+pip install git+https://github.com/divok11231/bitcoin-batch-analytics.git
 
