@@ -26,6 +26,21 @@ GPU-accelerated Bitcoin blockchain analytics tool. Analyze transaction fees, inp
 
 ---
 
+## Usage
+
+Analyze Bitcoin blocks starting from a specific block height:
+
+```bash
+bitcoin-analytics --start <block_height> --blocks <number_of_blocks>
+```
+
+Enable GPU acceleration with CUDA:
+
+```bash
+bitcoin-analytics --start <block_height> --blocks <number_of_blocks> --gpu
+```
+
+
 ## Installation
 
 ### Using pip
